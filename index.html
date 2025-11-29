@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>---741---</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: black;
+    color: #00FF00;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  h1 {
+    color: #00FF00;
+    text-shadow:
+      0 0 1px #FF000,
+      0 0 0px #00FF00,
+      0 0 20px #FF0000,
+      0 0 30px #FF0000;
+    font-size: 3.5rem;
+    margin: 15px 0;
+  }
+
+  #chat-container {
+    display: flex;
+    flex-direction: column;
+    width: 92%;
+    max-width: 800px;
+    height: 80vh;
+    background: rgba(,1,0,0.0);
+    border: px white;
+    border-radius: px;
+    box-shadow: 0 0 20px white;
+    overflow: hidden;
+  }
+
+  #messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    font-size: 1rem;
+  }
+
+  .message {
+    margin: 1px 0;
+    line-height: 1.5;
+    word-wrap: break-word;
+  }
+
+  .user { color: #FEFEFF; font-weight: bold; }
+  .stranger { color: #0C8346; font-weight: bold; }
+
+  #input-container {
+    display: flex;
+    border-top: 2px solid white;
+  }
+
+  #input {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    background: black;
+    color: #00FF00;
+    font-size: 1rem;
+    font-family: 'Courier New', monospace;
+  }
+
+  #send {
+    padding: 0 25px;
+    border: none;
+    background: solid white;
+    color: purple;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  /* Scrollbar style */
+  #messages::-webkit-scrollbar {
+    width: 8px;
+  }
+  #messages::-webkit-scrollbar-thumb {
+    background: black;
+    border-radius: 4px;
+  }
+  #messages::-webkit-scrollbar-track {
+    background: white;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    #chat-container { width: 100%; height: 75vh; border-radius: 0; }
+    #input { font-size: 1.1rem; padding: 12px; }
+    #send { font-size: 1.1rem; padding: 0 20px; }
+  }
+</style>
+</head>
+<body>
+  <h1>741-CHAT</h1>
+  <div id="chat-container">
+    <div id="messages"></div>
+    <div id="input-container">
+      <input type="text" id="input" placeholder="Type a message...">
+      <button id="send">Send</button>
+    </div>
+  </div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzo0BXfHL4wAfqfi-kiJrlxY_A3N56mcs",
+    authDomain: "chat-60dd0.firebaseapp.com",
+    projectId: "chat-60dd0",
+    storageBucket: "chat-60dd0.firebasestorage.app",
+    messagingSenderId: "832757279024",
+    appId: "1:832757279024:web:f77b446376067fc0b480f5",
+    measurementId: "G-JJMPK9492B"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const messagesDiv = document.getElementById('messages');
+  const input = document.getElementById('input');
+  const send = document.getElementById('send');
+
+  const userID = 'user' + Math.floor(Math.random()*10000);
+  const sessionID = 'session1';
+  const messagesRef = db.collection('sessions').doc(sessionID).collection('messages');
+
+  messagesRef.orderBy('timestamp').onSnapshot(snapshot => {
+    messagesDiv.innerHTML = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement('div');
+      div.classList.add('message');
+      div.innerHTML = `<span class="${data.user === userID ? 'user' : 'stranger'}">${data.user === userID ? 'You' : 'Stranger'}:</span> ${data.text}`;
+      messagesDiv.appendChild(div);
+    });
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+
+  send.addEventListener('click', () => {
+    if(input.value.trim() !== '') {
+      messagesRef.add({
+        user: userID,
+        text: input.value,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      input.value = '';
+    }
+  });
+
+  input.addEventListener('keypress', (e) => {
+    if(e.key === 'Enter') send.click();
+  });
+</script>
+</body>
+</html>
