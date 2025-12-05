@@ -4,182 +4,125 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>----741----</title>
-
 <style>
-*{box-sizing:border-box}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:black; color:white; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
+.screen { display:none; flex-direction:column; width:100%; max-width:900px; padding:20px; border:2px solid white; border-radius:10px; box-shadow:0 0 30px white; }
+.screen.active { display:flex; }
+h1 { text-align:center; margin-bottom:10px; letter-spacing:10px; }
 
-html,body{
-  height:100%;
-  margin:0;
-}
+/* inputs/buttons */
+input, button { width:100%; padding:10px; margin-bottom:8px; border:1px solid white; border-radius:6px; background:black; color:white; font-size:15px; }
+button:hover { background:white; color:black; cursor:pointer; }
 
-body{
-  background:black;
-  color:white;
-  font-family:Arial,Helvetica,sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:10px;
-}
+/* chat messages */
+#messages { height:400px; overflow-y:auto; border:1px solid white; border-radius:6px; padding:10px; background:black; margin-bottom:8px; }
+#messages::-webkit-scrollbar { width:6px; }
+#messages::-webkit-scrollbar-thumb { background:white; border-radius:3px; }
+#messages::-webkit-scrollbar-track { background:rgba(255,255,255,0.1); border-radius:3px; }
+.msg { margin-bottom:6px; }
 
-/* ✅ RESPONSIVE CHAT CONTAINER */
-.container{
-  width:100%;
-  max-width:900px;        /* desktop width */
-  height:100%;
-  max-height:90vh;        /* auto fit screen */
-  border:2px solid white;
-  box-shadow:0 0 30px white;
-  padding:14px;
-  border-radius:10px;
-  display:flex;
-  flex-direction:column;
-}
+/* row buttons */
+.row { display:flex; gap:8px; margin-bottom:8px; }
+.row button { flex:1; padding:8px 0; }
 
-h1{
-  text-align:center;
-  letter-spacing:10px;
-  margin:0 0 10px;
-}
-
-.hidden{display:none}
-
-/* ✅ CHAT AREA AUTO-SIZES */
-#messages{
-  flex:1;
-  overflow-y:auto;
-  border:1px solid white;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:6px;
-}
-
-.msg{margin-bottom:6px}
-
-input,button{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  background:black;
-  color:white;
-  border:1px solid white;
-  border-radius:6px;
-  font-size:15px;
-}
-
-button:hover{
-  background:white;
-  color:black;
-  cursor:pointer;
-}
-
-.row{
-  display:flex;
-  gap:8px;
-}
-
-.row button{
-  width:auto;
-  flex:1;
-}
-
-.admin-btn{
-  border-color:red;
-  color:red;
-}
-
-.admin-btn:hover{
-  background:red;
-  color:white;
-}
-
-/* ✅ MOBILE TWEAKS */
-@media (max-width:600px){
-  h1{letter-spacing:6px}
-}
+/* admin / owner styles */
+.admin-btn { border-color:red; color:red; }
+.admin-btn:hover { background:red; color:white; }
+.admin-name { font-weight:bold; animation: rainbow 3s linear infinite; }
+@keyframes rainbow { 0%{color:red;}14%{color:orange;}28%{color:yellow;}42%{color:green;}57%{color:blue;}71%{color:indigo;}85%{color:violet;}100%{color:red;} }
+.owner-name { font-weight:bold; color:red; text-shadow:0 0 5px red,0 0 10px darkred,0 0 15px darkred,0 0 20px black; animation:bloodStrikes 2s infinite; }
+@keyframes bloodStrikes{0%{text-shadow:0 0 5px red,0 0 10px darkred,0 0 15px darkred,0 0 20px black;}50%{text-shadow:0 0 10px red,0 0 20px darkred,0 0 25px darkred,0 0 30px black;}100%{text-shadow:0 0 5px red,0 0 10px darkred,0 0 15px darkred,0 0 20px black;}}
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active">
   <h1>741</h1>
+  <input id="nameInput" placeholder="Enter name">
+  <button id="enterBtn">ENTER CHAT</button>
+</div>
 
-  <!-- LOGIN -->
-  <div id="login">
-    <input id="nameInput" placeholder="Enter name">
-    <button id="enterBtn">ENTER CHAT</button>
+<!-- CHAT SCREEN -->
+<div id="chatScreen" class="screen">
+  <h1>741</h1>
+  <div class="row">
+    <button id="adminBtn">ADMIN</button>
+    <!-- Admin buttons container for dynamic buttons like CLEAR CHAT -->
+    <div id="adminButtonsContainer"></div>
   </div>
+  <div id="messages"></div>
+  <input id="msgInput" placeholder="Message">
+  <button id="sendBtn">SEND</button>
+</div>
 
-  <!-- CHAT -->
-  <div id="chat" class="hidden">
-    <div id="messages"></div>
-
-    <input id="msgInput" placeholder="Message">
-    <button id="sendBtn">SEND</button>
-
-    <div class="row">
-      <button id="adminBtn">ADMIN</button>
-      <button id="clearBtn" class="admin-btn hidden">CLEAR CHAT</button>
-    </div>
-  </div>
-
-  <!-- ADMIN -->
-  <div id="admin" class="hidden">
-    <input id="adminCode" placeholder="Admin code">
-    <button id="adminEnter">ENTER</button>
-    <button id="backBtn">BACK</button>
-  </div>
+<!-- ADMIN SCREEN -->
+<div id="adminScreen" class="screen">
+  <h1>ADMIN PANEL</h1>
+  <input id="adminCode" placeholder="Admin code">
+  <button id="adminEnter">ENTER</button>
+  <button id="backBtn">BACK</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import {
-  getFirestore, collection, addDoc,
-  query, orderBy, onSnapshot,
-  getDocs, deleteDoc, doc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCwwwuyCHElQHEPFp4aDAilazkZkpJSgwk",
-  authDomain: "chat-8bef7.firebaseapp.com",
-  projectId: "chat-8bef7",
-  storageBucket: "chat-8bef7.firebasestorage.app",
-  messagingSenderId: "493990140970",
-  appId: "1:493990140970:web:ea0e478103932b1bbd7753",
-  measurementId: "G-PLK37YYZV9"
+  apiKey:"AIzaSyCwwwuyCHElQHEPFp4aDAilazkZkpJSgwk",
+  authDomain:"chat-8bef7.firebaseapp.com",
+  projectId:"chat-8bef7",
+  storageBucket:"chat-8bef7.firebasestorage.app",
+  messagingSenderId:"493990140970",
+  appId:"1:493990140970:web:ea0e478103932b1bbd7753",
+  measurementId:"G-PLK37YYZV9"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const ADMIN_CODE = "XDFGA741OE380";
-let username = "";
-let isAdmin = false;
-const userColors = {};
+const ADMIN_CODE="XDFGA741OE380";
+const OWNER_CODE="XDFGA741OE381-OWNER";
+
+let username="", isAdmin=false, isOwner=false;
+const mutedUsers={};
 
 const messagesCol = collection(db,"messages");
 const q = query(messagesCol, orderBy("time"));
 
-const login = document.getElementById("login");
-const chat = document.getElementById("chat");
-const admin = document.getElementById("admin");
-const clearBtn = document.getElementById("clearBtn");
+// DOM
+const loginScreen = document.getElementById("loginScreen");
+const chatScreen = document.getElementById("chatScreen");
+const adminScreen = document.getElementById("adminScreen");
 const messagesBox = document.getElementById("messages");
+const enterBtn = document.getElementById("enterBtn");
+const sendBtn = document.getElementById("sendBtn");
+const adminBtn = document.getElementById("adminBtn");
+const adminEnter = document.getElementById("adminEnter");
+const backBtn = document.getElementById("backBtn");
+const adminCode = document.getElementById("adminCode");
+const nameInput = document.getElementById("nameInput");
+const msgInput = document.getElementById("msgInput");
+const adminButtonsContainer = document.getElementById("adminButtonsContainer");
 
-// REALTIME CHAT
-onSnapshot(q, snap => {
-  messagesBox.innerHTML = "";
-  snap.forEach(d => {
+// Show one screen at a time
+function showScreen(screen){
+  loginScreen.classList.remove("active");
+  chatScreen.classList.remove("active");
+  adminScreen.classList.remove("active");
+  screen.classList.add("active");
+}
+
+// REAL-TIME CHAT
+onSnapshot(q, snap=>{
+  messagesBox.innerHTML="";
+  snap.forEach(d=>{
     const m = d.data();
-    if (!userColors[m.user]) {
-      userColors[m.user] = `hsl(${Math.random()*360},100%,70%)`;
-    }
-    messagesBox.innerHTML += `
-      <div class="msg" style="color:${userColors[m.user]}">
-        <b>${m.user}:</b> ${m.text}
-      </div>`;
+    let displayName = `<span style="color:white;">${m.user}</span>`;
+    if(m.user.includes("(OWNER)")) displayName = `<span class="owner-name">${m.user}</span>`;
+    else if(m.user.includes("(admin)")) displayName = `<span class="admin-name">${m.user}</span>`;
+    messagesBox.innerHTML += `<div class="msg"><b>${displayName}:</b> ${m.text}</div>`;
   });
   messagesBox.scrollTop = messagesBox.scrollHeight;
 });
@@ -187,57 +130,68 @@ onSnapshot(q, snap => {
 // LOGIN
 enterBtn.onclick = () => {
   const base = nameInput.value.trim();
-  if (!base) return alert("Enter a name");
-  username = base + "-741";
-  login.classList.add("hidden");
-  chat.classList.remove("hidden");
+  if(!base) return alert("Enter a name");
+  username = base+"-741";
+  showScreen(chatScreen);
 };
 
 // SEND MESSAGE
 sendBtn.onclick = async () => {
   const text = msgInput.value.trim();
-  if (!text) return;
-  await addDoc(messagesCol, {
-    user: username,
-    text,
-    time: Date.now()
-  });
-  msgInput.value = "";
+  if(!text) return;
+  const muteEnd = mutedUsers[username];
+  if(muteEnd && Date.now() < muteEnd){
+    alert(`You are muted for ${Math.ceil((muteEnd-Date.now())/1000)} seconds!`);
+    return;
+  }
+  await addDoc(messagesCol, {user:username, text, time:Date.now()});
+  msgInput.value="";
 };
 
 // ADMIN PANEL
-adminBtn.onclick = () => {
-  chat.classList.add("hidden");
-  admin.classList.remove("hidden");
-};
+adminBtn.onclick = () => showScreen(adminScreen);
 
 adminEnter.onclick = () => {
-  if (adminCode.value === ADMIN_CODE) {
+  if(adminCode.value === ADMIN_CODE){
     isAdmin = true;
-    if (!username.includes("(admin)"))
-      username += " (admin)";
-    clearBtn.classList.remove("hidden");
+    if(!username.includes("(admin)")) username += " (admin)";
+    addClearButton(); // dynamically add
     alert("Admin access granted");
+  } else if(adminCode.value === OWNER_CODE){
+    isOwner = true;
+    isAdmin = true;
+    if(!username.includes("(OWNER)")) username += " (OWNER)";
+    addClearButton(); // dynamically add
+    alert("OWNER access granted!");
   } else alert("Wrong code");
-  adminCode.value = "";
-  admin.classList.add("hidden");
-  chat.classList.remove("hidden");
+  adminCode.value="";
+  showScreen(chatScreen);
 };
 
-// CLEAR CHAT
-clearBtn.onclick = async () => {
-  if (!confirm("Clear ALL messages?")) return;
-  const snap = await getDocs(messagesCol);
-  for (const d of snap.docs) {
-    await deleteDoc(doc(db,"messages", d.id));
-  }
-};
+// DYNAMIC CLEAR CHAT BUTTON
+function addClearButton(){
+  if(document.getElementById("clearBtn")) return; // already exists
+  const btn = document.createElement("button");
+  btn.id = "clearBtn";
+  btn.className = "admin-btn";
+  btn.textContent = "CLEAR CHAT";
+  btn.onclick = async () => {
+    if(!isAdmin) return;
+    if(!confirm("Clear ALL messages?")) return;
+    const snap = await getDocs(messagesCol);
+    for(const d of snap.docs){ await deleteDoc(doc(db,"messages",d.id)); }
+  };
+  adminButtonsContainer.appendChild(btn);
+}
 
-backBtn.onclick = () => {
-  admin.classList.add("hidden");
-  chat.classList.remove("hidden");
-};
+// BACK BUTTON
+backBtn.onclick = () => showScreen(chatScreen);
+
+// MUTE FUNCTION
+function muteUser(targetUsername, durationMs){
+  mutedUsers[targetUsername] = Date.now() + durationMs;
+  alert(`${targetUsername} has been muted for ${durationMs/1000} seconds`);
+}
 </script>
-
 </body>
 </html>
