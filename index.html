@@ -1,144 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>741-CHAT</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>----741----</title>
+
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Courier New', monospace;
-    background: black;
-    color: #00FF00;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-  }
-  h1 {
-    color: #00FF00;
-    text-shadow: 0 0 1px #FF000, 0 0 20px #FF0000, 0 0 30px #FF0000;
-    font-size: 3rem;
-    margin: 15px 0;
-  }
-  #chat-container {
-    display: flex;
-    flex-direction: column;
-    width: 90%;
-    max-width: 800px;
-    height: 80vh;
-    background: rgba(0,0,0,0.8);
-    border: 1px solid white;
-    border-radius: 5px;
-    box-shadow: 0 0 20px white;
-    overflow: hidden;
-  }
-  #messages {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    font-size: 1rem;
-  }
-  .message { margin: 2px 0; line-height: 1.5; word-wrap: break-word; }
-  .user { color: #FEFEFF; font-weight: bold; }
-  .stranger { color: #0C8346; font-weight: bold; }
-  #input-container {
-    display: flex;
-    border-top: 2px solid white;
-  }
-  #input {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    background: black;
-    color: #00FF00;
-    font-size: 1rem;
-    font-family: 'Courier New', monospace;
-  }
-  #send {
-    padding: 0 25px;
-    border: none;
-    background: white;
-    color: purple;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  #messages::-webkit-scrollbar { width: 8px; }
-  #messages::-webkit-scrollbar-thumb { background: black; border-radius: 4px; }
-  #messages::-webkit-scrollbar-track { background: white; }
-  @media (max-width: 600px) {
-    h1 { font-size: 2rem; }
-    #chat-container { width: 100%; height: 75vh; border-radius: 0; }
-    #input { font-size: 1.1rem; padding: 12px; }
-    #send { font-size: 1.1rem; padding: 0 20px; }
-  }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:#000;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:16px;
+}
+.container{
+  width:420px;
+  border:2px solid #fff;
+  box-shadow:0 0 28px #fff;
+  padding:14px;
+  border-radius:8px;
+}
+h1{
+  text-align:center;
+  letter-spacing:10px;
+  margin:0 0 10px;
+}
+.hidden{display:none}
+#messages{
+  height:260px;
+  overflow-y:auto;
+  border:1px solid #fff;
+  padding:8px;
+  margin-bottom:8px;
+}
+input,button{
+  width:100%;
+  padding:9px;
+  margin-top:8px;
+  background:black;
+  color:white;
+  border:1px solid white;
+  border-radius:6px;
+}
+button:hover{background:white;color:black;cursor:pointer}
+.msg{margin-bottom:6px}
+.admin-btn{border-color:red;color:red}
+.admin-btn:hover{background:red;color:white}
 </style>
 </head>
+
 <body>
-<h1>741-CHAT</h1>
-<div id="chat-container">
-  <div id="messages"></div>
-  <div id="input-container">
-    <input type="text" id="input" placeholder="Type a message...">
-    <button id="send">Send</button>
+<div class="container">
+  <h1>741</h1>
+
+  <!-- LOGIN -->
+  <div id="login">
+    <input id="nameInput" placeholder="Enter name">
+    <button id="enterBtn">ENTER CHAT</button>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat" class="hidden">
+    <div id="messages"></div>
+    <input id="msgInput" placeholder="Message">
+    <button id="sendBtn">SEND</button>
+    <button id="adminBtn">ADMIN</button>
+    <button id="clearBtn" class="admin-btn hidden">CLEAR CHAT (ADMIN)</button>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin" class="hidden">
+    <input id="adminCode" placeholder="Admin code">
+    <button id="adminEnter">ENTER</button>
+    <button id="backBtn">BACK</button>
   </div>
 </div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-  // Firebase config - replace with your own
-  const firebaseConfig = {
-    apiKey: "AIzaSyCwwwuyCHElQHEPFp4aDAilazkZkpJSgwk",
-    authDomain: "chat-8bef7.firebaseapp.com",
-    projectId: "chat-8bef7",
-    storageBucket: "chat-8bef7.appspot.com",
-    messagingSenderId: "493990140970",
-    appId: "1:493990140970:web:ea0e478103932b1bbd7753"
-  };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  getDocs,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+const firebaseConfig = {
+  apiKey: "AIzaSyCwwwuyCHElQHEPFp4aDAilazkZkpJSgwk",
+  authDomain: "chat-8bef7.firebaseapp.com",
+  projectId: "chat-8bef7",
+  storageBucket: "chat-8bef7.firebasestorage.app",
+  messagingSenderId: "493990140970",
+  appId: "1:493990140970:web:ea0e478103932b1bbd7753",
+  measurementId: "G-PLK37YYZV9"
+};
 
-  const messagesDiv = document.getElementById('messages');
-  const input = document.getElementById('input');
-  const send = document.getElementById('send');
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  // Random user ID for this session
-  const userID = 'user' + Math.floor(Math.random()*10000);
-  const messagesRef = db.collection('global-chat');
+const ADMIN_CODE = "XDFGA741OE380";
+let username = "";
+let isAdmin = false;
 
-  // Listen for live messages
-  messagesRef.orderBy('timestamp').onSnapshot(snapshot => {
-    messagesDiv.innerHTML = '';
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const div = document.createElement('div');
-      div.classList.add('message');
-      div.innerHTML = `<span class="${data.user === userID ? 'user' : 'stranger'}">
-        ${data.user === userID ? 'You-741' : 'Anonymous-741'}:
-      </span> ${data.text}`;
-      messagesDiv.appendChild(div);
-    });
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
+const userColors = {};
+const messagesCol = collection(db, "messages");
+const q = query(messagesCol, orderBy("time"));
 
-  // Send message
-  send.addEventListener('click', () => {
-    if(input.value.trim() !== '') {
-      messagesRef.add({
-        user: userID,
-        text: input.value,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      input.value = '';
+// DOM
+const login = document.getElementById("login");
+const chat = document.getElementById("chat");
+const admin = document.getElementById("admin");
+const clearBtn = document.getElementById("clearBtn");
+const messagesBox = document.getElementById("messages");
+
+// LISTENER
+onSnapshot(q, snap => {
+  messagesBox.innerHTML = "";
+  snap.forEach(d => {
+    const m = d.data();
+    if (!userColors[m.user]) {
+      userColors[m.user] = `hsl(${Math.random()*360},100%,70%)`;
     }
+    messagesBox.innerHTML += `
+      <div class="msg" style="color:${userColors[m.user]}">
+        <b>${m.user}:</b> ${m.text}
+      </div>`;
   });
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+});
 
-  // Press Enter to send
-  input.addEventListener('keypress', e => { if(e.key==='Enter') send.click(); });
+// LOGIN
+document.getElementById("enterBtn").onclick = () => {
+  const base = nameInput.value.trim();
+  if (!base) return alert("Enter a name");
+  username = base + "-741";
+  login.classList.add("hidden");
+  chat.classList.remove("hidden");
+};
+
+// SEND MESSAGE
+document.getElementById("sendBtn").onclick = async () => {
+  if (!msgInput.value.trim()) return;
+  await addDoc(messagesCol, {
+    user: username,
+    text: msgInput.value.trim(),
+    time: Date.now()
+  });
+  msgInput.value = "";
+};
+
+// ADMIN PANEL
+document.getElementById("adminBtn").onclick = () => {
+  chat.classList.add("hidden");
+  admin.classList.remove("hidden");
+};
+
+document.getElementById("adminEnter").onclick = () => {
+  if (adminCode.value === ADMIN_CODE) {
+    isAdmin = true;
+    if (!username.includes("(admin)")) {
+      username += " (admin)";
+    }
+    clearBtn.classList.remove("hidden");
+    alert("Admin granted");
+  } else {
+    alert("Wrong code");
+  }
+  adminCode.value = "";
+  admin.classList.add("hidden");
+  chat.classList.remove("hidden");
+};
+
+// CLEAR CHAT
+clearBtn.onclick = async () => {
+  if (!isAdmin) return;
+  if (!confirm("Clear ALL messages?")) return;
+  const snap = await getDocs(messagesCol);
+  for (const d of snap.docs) {
+    await deleteDoc(doc(db, "messages", d.id));
+  }
+};
+
+document.getElementById("backBtn").onclick = () => {
+  admin.classList.add("hidden");
+  chat.classList.remove("hidden");
+};
 </script>
 </body>
 </html>
