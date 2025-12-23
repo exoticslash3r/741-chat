@@ -82,8 +82,8 @@ measurementId:"G-PLK37YYZV9"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const ADMIN_CODE="X741divisionadmin";
-const OWNER_CODE="X741divisionowner-1";
+const ADMIN_CODE="X741654divisionadmin";
+const OWNER_CODE="X741654divisionowner-1";
 
 let username="", isAdmin=false, isOwner=false;
 const mutedUsers={};
@@ -131,7 +131,7 @@ messagesBox.scrollTop = messagesBox.scrollHeight;
 enterBtn.onclick = () => {
 const base = nameInput.value.trim();
 if(!base) return alert("Enter a name");
-username = base+"-741";
+username = base+"-741654";
 showScreen(chatScreen);
 };
 
