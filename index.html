@@ -3,47 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>9141 Division</title>
+<title>----9141----</title>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
 body { background:black; color:white; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
-.screen { display:none; flex-direction:column; width:100%; max-width:900px; padding:20px; border:2px solid white; border-radius:10px; }
+.screen { display:none; flex-direction:column; width:100%; max-width:900px; padding:20px; border:2px solid white; border-radius:10px; box-shadow:0 0 30px white; }
 .screen.active { display:flex; }
-h1 { text-align:center; margin-bottom:20px; }
-input, button { width:100%; padding:12px; margin-bottom:10px; border:1px solid white; border-radius:6px; background:black; color:white; font-size:16px; }
+h1 { text-align:center; margin-bottom:10px; letter-spacing:10px; }
+input, button { width:100%; padding:10px; margin-bottom:8px; border:1px solid white; border-radius:6px; background:black; color:white; font-size:15px; }
 button:hover { background:white; color:black; cursor:pointer; }
-#messages { height:400px; overflow-y:auto; border:1px solid white; border-radius:6px; padding:10px; margin-bottom:10px; }
+#messages { height:400px; overflow-y:auto; border:1px solid white; border-radius:6px; padding:10px; background:black; margin-bottom:8px; }
+#messages::-webkit-scrollbar { width:6px; }
+#messages::-webkit-scrollbar-thumb { background:white; border-radius:3px; }
+#messages::-webkit-scrollbar-track { background:rgba(255,255,255,0.1); border-radius:3px; }
 .msg { margin-bottom:6px; }
-.google-btn { background:white; color:black; font-weight:bold; }
-.google-btn:hover { background:#4285f4; color:white; }
-#userInfo { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-#logoutBtn { width:auto; padding:5px 10px; margin:0; }
-.blood-name { 
-  font-weight:bold; 
-  color:red; 
-  text-shadow:0 0 5px red,0 0 10px darkred,0 0 15px darkred,0 0 20px black;
-  animation:bloodStrikes 2s infinite; 
-}
-@keyframes bloodStrikes {
-  0%{text-shadow:0 0 5px red,0 0 10px darkred,0 0 15px darkred,0 0 20px black;}
-  50%{text-shadow:0 0 10px red,0 0 20px darkred,0 0 25px darkred,0 0 30px black;}
-  100%{text-shadow:0 0 5px red,0 0 10px darkred,0 0 15px darkred,0 0 20px black;}
-}
+.row { display:flex; gap:8px; margin-bottom:8px; }
+.row button { flex:1; padding:8px 0; }
 </style>
 </head>
 <body>
 
 <div id="loginScreen" class="screen active">
-<h1>9141 Division</h1>
-<button id="googleSignIn" class="google-btn">Sign in with Google</button>
+<h1>9141 Division.</h1>
+<input id="nameInput" placeholder="Enter name">
+<button id="enterBtn">ENTER CHAT</button>
 </div>
 
 <div id="chatScreen" class="screen">
-<h1>9141 Division</h1>
-<div id="userInfo">
-<span id="displayName"></span>
-<button id="logoutBtn">Logout</button>
-</div>
+<h1>9141 Division.</h1>
 <div id="messages"></div>
 <input id="msgInput" placeholder="Message">
 <button id="sendBtn">SEND</button>
@@ -52,7 +39,6 @@ button:hover { background:white; color:black; cursor:pointer; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 const firebaseConfig = {
 apiKey:"AIzaSyCwwwuyCHElQHEPFp4aDAilazkZkpJSgwk",
@@ -60,25 +46,25 @@ authDomain:"chat-8bef7.firebaseapp.com",
 projectId:"chat-8bef7",
 storageBucket:"chat-8bef7.firebasestorage.app",
 messagingSenderId:"493990140970",
-appId:"1:493990140970:web:ea0e478103932b1bbd7753"
+appId:"1:493990140970:web:ea0e478103932b1bbd7753",
+measurementId:"G-PLK37YYZV9"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+
+let username = "";
+
+const messagesCol = collection(db, "messages");
+const q = query(messagesCol, orderBy("timestamp"));
 
 const loginScreen = document.getElementById("loginScreen");
 const chatScreen = document.getElementById("chatScreen");
 const messagesBox = document.getElementById("messages");
-const googleSignIn = document.getElementById("googleSignIn");
+const enterBtn = document.getElementById("enterBtn");
 const sendBtn = document.getElementById("sendBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+const nameInput = document.getElementById("nameInput");
 const msgInput = document.getElementById("msgInput");
-const displayNameSpan = document.getElementById("displayName");
-
-const messagesCol = collection(db, "messages");
-const q = query(messagesCol, orderBy("timestamp"));
 
 function showScreen(screen) {
 loginScreen.classList.remove("active");
@@ -90,52 +76,26 @@ onSnapshot(q, snap => {
 messagesBox.innerHTML = "";
 snap.forEach(d => {
 const m = d.data();
-let nameDisplay = m.user;
-let nameClass = "";
-
-if (m.email === "exoticslash3r@gmail.com") {
-nameClass = "blood-name";
-}
-
-if (nameClass) {
-messagesBox.innerHTML += `<div class="msg"><b class="${nameClass}">${nameDisplay}:</b> ${m.text}</div>`;
-} else {
-messagesBox.innerHTML += `<div class="msg"><b>${nameDisplay}:</b> ${m.text}</div>`;
-}
+messagesBox.innerHTML += `<div class="msg"><b>${m.user}:</b> ${m.text}</div>`;
 });
 messagesBox.scrollTop = messagesBox.scrollHeight;
 });
 
-onAuthStateChanged(auth, user => {
-if (user) {
-displayNameSpan.textContent = user.displayName;
+enterBtn.onclick = () => {
+const base = nameInput.value.trim();
+if (!base) return alert("Enter a name");
+username = base + "-9141";
 showScreen(chatScreen);
-} else {
-showScreen(loginScreen);
-}
-});
-
-googleSignIn.onclick = () => {
-signInWithPopup(auth, provider)
-.catch(error => alert(error.message));
-};
-
-logoutBtn.onclick = () => {
-signOut(auth);
 };
 
 sendBtn.onclick = async () => {
-if (!auth.currentUser) return;
 const text = msgInput.value.trim();
 if (!text) return;
-
-await addDoc(messagesCol, {
-user: auth.currentUser.displayName,
-email: auth.currentUser.email,
-text: text,
-timestamp: serverTimestamp()
+await addDoc(messagesCol, { 
+user: username, 
+text: text, 
+timestamp: serverTimestamp() 
 });
-
 msgInput.value = "";
 };
 </script>
