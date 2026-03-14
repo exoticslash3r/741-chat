@@ -2,102 +2,451 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
 <title>----9141----</title>
 <style>
-* { box-sizing:border-box; margin:0; padding:0; }
-body { background:black; color:white; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
-.screen { display:none; flex-direction:column; width:100%; max-width:900px; padding:20px; border:2px solid white; border-radius:10px; box-shadow:0 0 30px white; }
-.screen.active { display:flex; }
-h1 { text-align:center; margin-bottom:10px; letter-spacing:10px; }
-input, button { width:100%; padding:10px; margin-bottom:8px; border:1px solid white; border-radius:6px; background:black; color:white; font-size:15px; }
-button:hover { background:white; color:black; cursor:pointer; }
-#messages { height:400px; overflow-y:auto; border:1px solid white; border-radius:6px; padding:10px; background:black; margin-bottom:8px; }
-#messages::-webkit-scrollbar { width:6px; }
-#messages::-webkit-scrollbar-thumb { background:white; border-radius:3px; }
-#messages::-webkit-scrollbar-track { background:rgba(255,255,255,0.1); border-radius:3px; }
-.msg { margin-bottom:6px; }
-.row { display:flex; gap:8px; margin-bottom:8px; }
-.row button { flex:1; padding:8px 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: black url('https://i.postimg.cc/tCQzBshm/9141div.png') repeat center center fixed;
+  background-size: cover;
+  color: white;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#splash {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  transition: opacity 0.5s ease;
+}
+#splash.hide { opacity: 0; pointer-events: none; }
+#splash img { max-width: 90%; max-height: 70vh; border: 2px solid white; border-radius: 10px; box-shadow: 0 0 30px white; margin-bottom: 20px; }
+#splash p { font-size: 1.2rem; letter-spacing: 2px; text-align: center; padding: 0 10px; }
+.screen { display: none; flex-direction: column; width: 100%; max-width: 900px; padding: 20px; border: 2px solid white; border-radius: 10px; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); box-shadow: 0 0 30px white; }
+.screen.active { display: flex; }
+h1 { text-align: center; margin-bottom: 10px; letter-spacing: 5px; word-break: break-word; }
+input, button, .file-label { width: 100%; padding: 12px; margin-bottom: 8px; border: 1px solid white; border-radius: 6px; background: black; color: white; font-size: 16px; }
+button:hover, .file-label:hover { background: white; color: black; cursor: pointer; }
+#messages, #leaderMessages { height: 400px; overflow-y: auto; border: 1px solid white; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.8); margin-bottom: 8px; }
+#messages::-webkit-scrollbar, #leaderMessages::-webkit-scrollbar { width: 6px; }
+#messages::-webkit-scrollbar-thumb, #leaderMessages::-webkit-scrollbar-thumb { background: white; border-radius: 3px; }
+.msg { margin-bottom: 8px; word-wrap: break-word; border-bottom: 1px solid #333; padding-bottom: 4px; }
+.msg img, .msg video { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 5px; border: 1px solid #555; }
+.row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.row button { flex: 1 1 120px; }
+.leader-tag {
+  display: inline-block;
+  background: white;
+  color: black;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-left: 6px;
+  text-transform: uppercase;
+  animation: glowPulse 1.5s infinite alternate;
+  vertical-align: middle;
+}
+@keyframes glowPulse {
+  0% { background: white; color: black; box-shadow: 0 0 5px white; }
+  100% { background: black; color: white; box-shadow: 0 0 15px white; }
+}
+#codeContainer {
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+  max-height: 0;
+  opacity: 0;
+}
+#codeContainer.show { max-height: 200px; opacity: 1; }
+#leaderStatus { color: yellow; font-size: 0.9rem; text-align: center; margin: 5px 0; }
+#sidebar {
+  position: fixed;
+  top: 0; left: -260px; width: 250px; height: 100%;
+  background: rgba(10,10,10,0.95);
+  border-right: 2px solid white;
+  transition: left 0.3s ease;
+  padding: 20px;
+  z-index: 1500;
+  backdrop-filter: blur(4px);
+}
+#sidebar.open { left: 0; }
+#sidebar button { margin: 15px 0; background: #111; border: 1px solid white; }
+#sidebar h3 { border-bottom: 1px solid white; padding-bottom: 10px; margin-bottom: 15px; }
+#menuToggle {
+  position: fixed;
+  top: 15px; left: 15px;
+  background: black;
+  border: 2px solid white;
+  color: white;
+  font-size: 24px;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1600;
+  box-shadow: 0 0 15px white;
+}
+#menuToggle:hover { background: white; color: black; }
+#chatHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+#chatHeader h2 { font-size: 1.2rem; letter-spacing: 2px; }
+.file-label { display: inline-block; text-align: center; background: black; border: 1px solid white; margin-bottom: 0; }
+#uploadStatus { font-size: 0.8rem; color: #ccc; margin-top: -5px; margin-bottom: 8px; }
+@media (max-width: 600px) {
+  .screen { padding: 15px; }
+  h1 { font-size: 1.5rem; letter-spacing: 3px; }
+  #menuToggle { width: 40px; height: 40px; font-size: 20px; }
+}
 </style>
 </head>
 <body>
-
-<div id="loginScreen" class="screen active">
-<h1>9141 Division.</h1>
-<input id="nameInput" placeholder="Enter name">
-<button id="enterBtn">ENTER CHAT</button>
+<div id="splash">
+  <img src="https://s3.ezgif.com/tmp/ezgif-366895dfd3e5571e.gif" alt="splash">
+  <p>Ati crezut ca nu vom reveni. Te redirectionam la pagina.</p>
 </div>
 
+<div id="sidebar">
+  <h3>9141 DIVISION</h3>
+  <button id="showPublicChat">Diviziunea 9141 chat</button>
+  <button id="showLeaderChannel">Diviziunea 9141</button>
+</div>
+<div id="menuToggle">☰</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active">
+  <h1>9141 Division.</h1>
+  <input id="nameInput" placeholder="Introdu numele" autocomplete="off">
+  <div id="codeContainer">
+    <input id="codeInput" placeholder="Ataseazati codul" type="password">
+    <button id="submitCodeBtn">Solicita lider</button>
+  </div>
+  <div id="leaderStatus"></div>
+  <button id="enterBtn">INTRĂ ÎN CHAT</button>
+</div>
+
+<!-- CHAT SCREEN (public) -->
 <div id="chatScreen" class="screen">
-<h1>9141 Division.</h1>
-<div id="messages"></div>
-<input id="msgInput" placeholder="Message">
-<button id="sendBtn">SEND</button>
+  <div id="chatHeader">
+    <h2 id="currentChannelTitle">Diviziunea 9141 chat</h2>
+  </div>
+  <div id="messages"></div>
+  <div class="row">
+    <input id="msgInput" placeholder="Mesaj">
+    <button id="sendBtn">Trimite</button>
+  </div>
+  <div class="row">
+    <label for="fileUpload" class="file-label">📎 Imagine/Video</label>
+    <input type="file" id="fileUpload" accept="image/*,video/*" style="display:none;">
+    <button id="uploadBtn">Upload</button>
+  </div>
+  <div id="uploadStatus"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDoc, updateDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
 const firebaseConfig = {
-apiKey:"AIzaSyCwwwuyCHElQHEPFp4aDAilazkZkpJSgwk",
-authDomain:"chat-8bef7.firebaseapp.com",
-projectId:"chat-8bef7",
-storageBucket:"chat-8bef7.firebasestorage.app",
-messagingSenderId:"493990140970",
-appId:"1:493990140970:web:ea0e478103932b1bbd7753",
-measurementId:"G-PLK37YYZV9"
+  apiKey: "AIzaSyCwwwuyCHElQHEPFp4aDAilazkZkpJSgwk",
+  authDomain: "chat-8bef7.firebaseapp.com",
+  projectId: "chat-8bef7",
+  storageBucket: "chat-8bef7.firebasestorage.app",
+  messagingSenderId: "493990140970",
+  appId: "1:493990140970:web:ea0e478103932b1bbd7753",
+  measurementId: "G-PLK37YYZV9"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 let username = "";
+let currentUserIsLeader = false;
+let leaderRequestId = null;
+let currentChannel = "public"; // "public" or "leader"
+let unsubscribePublic = null;
+let unsubscribeLeader = null;
 
-const messagesCol = collection(db, "messages");
-const q = query(messagesCol, orderBy("timestamp"));
+// DOM elements
+const splash = document.getElementById('splash');
+const loginScreen = document.getElementById('loginScreen');
+const chatScreen = document.getElementById('chatScreen');
+const nameInput = document.getElementById('nameInput');
+const codeContainer = document.getElementById('codeContainer');
+const codeInput = document.getElementById('codeInput');
+const submitCodeBtn = document.getElementById('submitCodeBtn');
+const leaderStatus = document.getElementById('leaderStatus');
+const enterBtn = document.getElementById('enterBtn');
+const messagesBox = document.getElementById('messages');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const fileUpload = document.getElementById('fileUpload');
+const uploadBtn = document.getElementById('uploadBtn');
+const uploadStatus = document.getElementById('uploadStatus');
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const showPublicBtn = document.getElementById('showPublicChat');
+const showLeaderBtn = document.getElementById('showLeaderChannel');
+const currentChannelTitle = document.getElementById('currentChannelTitle');
 
-const loginScreen = document.getElementById("loginScreen");
-const chatScreen = document.getElementById("chatScreen");
-const messagesBox = document.getElementById("messages");
-const enterBtn = document.getElementById("enterBtn");
-const sendBtn = document.getElementById("sendBtn");
-const nameInput = document.getElementById("nameInput");
-const msgInput = document.getElementById("msgInput");
+// Splash timeout
+setTimeout(() => {
+  splash.classList.add('hide');
+}, 1000);
 
-function showScreen(screen) {
-loginScreen.classList.remove("active");
-chatScreen.classList.remove("active");
-screen.classList.add("active");
+// Detect "liderul" in name input
+nameInput.addEventListener('input', (e) => {
+  if (e.target.value.toLowerCase() === 'liderul') {
+    codeContainer.classList.add('show');
+  } else {
+    codeContainer.classList.remove('show');
+  }
+});
+
+// Submit leader code
+submitCodeBtn.onclick = async () => {
+  const code = codeInput.value.trim();
+  if (code !== 'www-9141-lider-request') {
+    alert('Cod incorect');
+    return;
+  }
+  const baseName = nameInput.value.trim();
+  if (!baseName) { alert('Introdu un nume'); return; }
+  
+  // Create unique request ID
+  const requestId = baseName + '_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+  const ownerRef = doc(db, 'owner', requestId);
+  await setDoc(ownerRef, {
+    username: baseName,
+    status: 'pending',
+    timestamp: serverTimestamp()
+  });
+  leaderRequestId = requestId;
+  localStorage.setItem('leaderRequestId', requestId);
+  leaderStatus.innerText = 'Esti in pend de verificare. Tocmai ce verificam daca esti un lider sau nu.';
+  
+  // Listen for approval/decline
+  onSnapshot(doc(db, 'owner', requestId), (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    if (data.status === 'approved') {
+      currentUserIsLeader = true;
+      localStorage.setItem('isLeader', 'true');
+      leaderStatus.innerText = 'Aprobat! Intra in chat.';
+      // Auto-enter chat?
+    } else if (data.status === 'declined') {
+      localStorage.removeItem('leaderRequestId');
+      localStorage.removeItem('isLeader');
+      window.location.href = 'https://s3.ezgif.com/tmp/ezgif-366895dfd3e5571e.gif';
+    }
+  });
+};
+
+// Check local storage for existing leader approval
+const storedRequestId = localStorage.getItem('leaderRequestId');
+if (storedRequestId) {
+  getDoc(doc(db, 'owner', storedRequestId)).then(snap => {
+    if (snap.exists() && snap.data().status === 'approved') {
+      currentUserIsLeader = true;
+      localStorage.setItem('isLeader', 'true');
+    } else {
+      localStorage.removeItem('leaderRequestId');
+      localStorage.removeItem('isLeader');
+    }
+  });
 }
 
-onSnapshot(q, snap => {
-messagesBox.innerHTML = "";
-snap.forEach(d => {
-const m = d.data();
-messagesBox.innerHTML += `<div class="msg"><b>${m.user}:</b> ${m.text}</div>`;
-});
-messagesBox.scrollTop = messagesBox.scrollHeight;
-});
-
+// Enter chat (normal or leader)
 enterBtn.onclick = () => {
-const base = nameInput.value.trim();
-if (!base) return alert("Enter a name");
-username = base + "-9141";
-showScreen(chatScreen);
+  const base = nameInput.value.trim();
+  if (!base) return alert('Introdu un nume');
+  username = base + '-9141';
+  
+  // If leader flag is set, we keep it
+  if (localStorage.getItem('isLeader') === 'true') currentUserIsLeader = true;
+  
+  showScreen(chatScreen);
+  // Subscribe to public channel by default
+  switchChannel('public');
 };
 
+function showScreen(screen) {
+  loginScreen.classList.remove('active');
+  chatScreen.classList.remove('active');
+  screen.classList.add('active');
+}
+
+// Channel switching
+function switchChannel(channel) {
+  currentChannel = channel;
+  if (channel === 'public') {
+    currentChannelTitle.innerText = 'Diviziunea 9141 chat';
+    document.getElementById('messages').style.display = 'block';
+    document.getElementById('leaderMessages')?.remove(); // remove if exists
+    // Ensure public messages container exists
+    if (!document.getElementById('messages')) {
+      const newBox = document.createElement('div');
+      newBox.id = 'messages';
+      chatScreen.insertBefore(newBox, msgInput.parentNode);
+    }
+    // Unsubscribe from leader and subscribe to public
+    if (unsubscribeLeader) unsubscribeLeader();
+    const q = query(collection(db, 'messages'), orderBy('timestamp'));
+    unsubscribePublic = onSnapshot(q, (snap) => {
+      const box = document.getElementById('messages');
+      if (!box) return;
+      box.innerHTML = '';
+      snap.forEach(d => {
+        const m = d.data();
+        const tag = m.isLeader ? '<span class="leader-tag">Qeth</span>' : '';
+        let mediaHtml = '';
+        if (m.mediaUrl) {
+          if (m.mediaType?.startsWith('image/')) mediaHtml = `<br><img src="${m.mediaUrl}" alt="image">`;
+          else if (m.mediaType?.startsWith('video/')) mediaHtml = `<br><video controls src="${m.mediaUrl}"></video>`;
+        }
+        box.innerHTML += `<div class="msg"><b>${m.user}</b>${tag}: ${m.text || ''} ${mediaHtml}</div>`;
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+  } else {
+    // Leader channel
+    currentChannelTitle.innerText = 'Diviziunea 9141 (lideri)';
+    // Create or reuse leader messages container
+    let leaderBox = document.getElementById('leaderMessages');
+    if (!leaderBox) {
+      leaderBox = document.createElement('div');
+      leaderBox.id = 'leaderMessages';
+      chatScreen.insertBefore(leaderBox, document.querySelector('#msgInput').parentNode);
+    }
+    document.getElementById('messages').style.display = 'none';
+    leaderBox.style.display = 'block';
+    
+    if (unsubscribePublic) unsubscribePublic();
+    const q = query(collection(db, 'leaderMessages'), orderBy('timestamp'));
+    unsubscribeLeader = onSnapshot(q, (snap) => {
+      const box = document.getElementById('leaderMessages');
+      box.innerHTML = '';
+      snap.forEach(d => {
+        const m = d.data();
+        const tag = m.isLeader ? '<span class="leader-tag">Qeth</span>' : '';
+        let mediaHtml = '';
+        if (m.mediaUrl) {
+          if (m.mediaType?.startsWith('image/')) mediaHtml = `<br><img src="${m.mediaUrl}" alt="image">`;
+          else if (m.mediaType?.startsWith('video/')) mediaHtml = `<br><video controls src="${m.mediaUrl}"></video>`;
+        }
+        box.innerHTML += `<div class="msg"><b>${m.user}</b>${tag}: ${m.text || ''} ${mediaHtml}</div>`;
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+  }
+}
+
+// Send message
 sendBtn.onclick = async () => {
-const text = msgInput.value.trim();
-if (!text) return;
-await addDoc(messagesCol, {
-user: username,
-text: text,
-timestamp: serverTimestamp()
-});
-msgInput.value = "";
+  const text = msgInput.value.trim();
+  if (!text && !fileUpload.files.length) return;
+  
+  const messageData = {
+    user: username,
+    text: text,
+    timestamp: serverTimestamp(),
+    isLeader: currentUserIsLeader || false
+  };
+  
+  if (currentChannel === 'public') {
+    await addDoc(collection(db, 'messages'), messageData);
+  } else {
+    // leader channel: only leader can post
+    if (!currentUserIsLeader) {
+      alert('Doar liderii pot posta aici.');
+      return;
+    }
+    await addDoc(collection(db, 'leaderMessages'), messageData);
+  }
+  msgInput.value = '';
 };
+
+// File upload
+uploadBtn.onclick = () => {
+  fileUpload.click();
+};
+
+fileUpload.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  if (!currentUserIsLeader && currentChannel === 'leader') {
+    alert('Doar liderii pot uploada in canalul liderilor.');
+    fileUpload.value = '';
+    return;
+  }
+  
+  uploadStatus.innerText = 'Se incarca...';
+  const storageRef = ref(storage, `media/${Date.now()}_${file.name}`);
+  const uploadTask = uploadBytesResumable(storageRef, file);
+  
+  uploadTask.on('state_changed',
+    (snapshot) => {
+      const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      uploadStatus.innerText = `Upload: ${Math.round(progress)}%`;
+    },
+    (error) => {
+      uploadStatus.innerText = 'Eroare upload';
+      console.error(error);
+    },
+    async () => {
+      const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+      const messageData = {
+        user: username,
+        text: '',
+        mediaUrl: downloadURL,
+        mediaType: file.type,
+        timestamp: serverTimestamp(),
+        isLeader: currentUserIsLeader || false
+      };
+      
+      if (currentChannel === 'public') {
+        await addDoc(collection(db, 'messages'), messageData);
+      } else {
+        if (!currentUserIsLeader) return;
+        await addDoc(collection(db, 'leaderMessages'), messageData);
+      }
+      uploadStatus.innerText = 'Upload complet!';
+      fileUpload.value = '';
+      setTimeout(() => { uploadStatus.innerText = ''; }, 2000);
+    }
+  );
+});
+
+// Sidebar menu
+menuToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+});
+
+showPublicBtn.addEventListener('click', () => {
+  switchChannel('public');
+  sidebar.classList.remove('open');
+});
+
+showLeaderBtn.addEventListener('click', () => {
+  switchChannel('leader');
+  sidebar.classList.remove('open');
+});
+
+// If leader channel is selected but user is not leader, show message but allow viewing
+// already handled by send restriction
+
+// Redirect if someone tries to send to leader without being leader
 </script>
 </body>
 </html>
